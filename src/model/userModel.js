@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const crypto = require('crypto')
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -8,7 +9,8 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, "Please fill password area"]
+        required: [true, "Please fill password area"],
+        select: false
     },
     passwordConfirm: {
         type: String,
@@ -18,7 +20,9 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
         required: true
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
 }, {timestamps: true})
 
 
@@ -34,5 +38,14 @@ UserSchema.methods.correctPassword = async function(candidatePassword, userPassw
     return await bcrypt.compare(candidatePassword, userPassword)
 }
 
+
+UserSchema.methods.getResetPasswordToken = function(){
+    const resetToken = crypto.randomBytes(20).toString("hex")
+
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+    this.resetPasswordExpire = Date.now() + 10 * (60*1000)
+
+    return resetToken
+}
 
 module.exports = mongoose.model('User', UserSchema)

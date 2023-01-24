@@ -44,20 +44,20 @@ app.use('/api',ApiLimiter )
 app.use(json());
 app.use(urlencoded({ limit: "1mb", extended: true }));
 
-const RedisStore = connectredis(session)
-redisClient.connect().catch(err => console.log('Couldnt connect to redis ',err))
+//const RedisStore = connectredis(session)
+//redisClient.connect().catch(err => console.log('Couldnt connect to redis ',err))
 
-app.use(session({
-    store: new RedisStore({client: redisClient}),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, //if true only transmit over https
-        httpOnly: false, //if true prevent client side JS from reading the cookie
-        maxAge: 1000 * 60 * 60 // session maxAge in miliseconds
-    }
-}))
+//app.use(session({
+    //store: new RedisStore({client: redisClient}),
+    //secret: process.env.SESSION_SECRET,
+    //resave: false,
+    //saveUninitialized: false,
+    //cookie: {
+       // secure: false, //if true only transmit over https
+        //httpOnly: false, //if true prevent client side JS from reading the cookie
+       // maxAge: 1000 * 60 * 60 // session maxAge in miliseconds
+    //}
+//}))
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
