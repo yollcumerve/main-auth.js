@@ -39,3 +39,23 @@ exports.login = catchAsync( async(req,res,next) => {
     //3- Everything is alright 
     signTokenAndSend(user, 200,res)
 })
+
+exports.forgotPassword = catchAsync(async (req,res,next) => {
+
+})
+
+
+exports.resetPassword = catchAsync(async (req,res,next) => {
+
+})
+
+
+
+
+
+
+
+
+
+
+

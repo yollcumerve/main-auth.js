@@ -9,6 +9,15 @@ const corsOptions = require("./helper/corsOptions");
 const xss = require("xss-clean");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
+const session = require('express-session')
+const { createClient } = require('redis')
+const connectredis = require('connect-redis')
+const redisClient = createClient({legacyMode: true})
+const sessionConfig = {
+    resave: false,
+    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET
+}
 
 //Set security HTTP headers
 app.use(helmet());
@@ -35,6 +44,21 @@ app.use('/api',ApiLimiter )
 app.use(json());
 app.use(urlencoded({ limit: "1mb", extended: true }));
 
+const RedisStore = connectredis(session)
+redisClient.connect().catch(err => console.log('Couldnt connect to redis ',err))
+
+app.use(session({
+    store: new RedisStore({client: redisClient}),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, //if true only transmit over https
+        httpOnly: false, //if true prevent client side JS from reading the cookie
+        maxAge: 1000 * 60 * 60 // session maxAge in miliseconds
+    }
+}))
+
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
@@ -43,7 +67,13 @@ app.use(xss());
 
 app.use(cors(corsOptions));
 
-app.use(require("./routes/authRoute"));
+//session
+app.use(session(sessionConfig))
+
+
+app.use('/api/auth', require("./routes/authRoute"));
+
+
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can not find ${req.originalUrl} in this server`));

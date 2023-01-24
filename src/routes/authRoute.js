@@ -8,4 +8,8 @@ router.post('/register', authValidation.register, authService.register)
 
 router.post('/login', authValidation.login, verifyToken, authService.login)
 
+router.post('/forgotPassword', authService.forgotPassword)
+
+router.put('/resetPassword/:resetToken', authService.resetPassword)
+
 module.exports = router
